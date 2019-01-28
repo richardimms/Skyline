@@ -8,19 +8,25 @@ class Controller:
 
     def __init__(self, fileLocation):
         # Datetime is set once data is loaded
-        self.dt = None
-        self.fileLocation = fileLocation
-        self.data = None
+        self._dt = None
+        self._fileLocation = fileLocation
+        self._data = None
 
     def loadData(self):
-        self.data = backtester.DataLoader(self.fileLocation).loadDataFromCSV()
-        self.dt = self.data.index[0]
+        self._data = backtester.DataLoader(self._fileLocation).loadDataFromCSV()
+        self._dt = self._data.index[0]
     
     def incrementTime(self):
-        self.dt = self.dt + pd.Timedelta('1 hour')
+        self._dt = self._dt + pd.Timedelta('1 hour')
+    
+    def returnDt(self):
+        """
+        Returns the current datetime.
+        """
+        return self._dt
     
     def returnClose(self):
         """
         Returns the current close price.
         """
-        return self.data.loc[self.dt]['close']
+        return self._data.loc[self._dt]['close']
