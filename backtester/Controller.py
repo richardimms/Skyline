@@ -1,5 +1,6 @@
 import pandas as pd
 import backtester
+from data import data_loader
 
 class Controller:
     """
@@ -10,11 +11,12 @@ class Controller:
         # Datetime is set once data is loaded
         self._dt = None
         self._fileLocation = fileLocation
-        self._data = None
+        self._dataFromFile = None
+        self._dataLoader = data_loader
 
     def loadData(self):
-        self._data = backtester.DataLoader(self._fileLocation).loadDataFromCSV()
-        self._dt = self._data.index[0]
+        self._dataFromFile = self._dataLoader.DataLoader(self._fileLocation).loadDataFromCSV()
+        self._dt = self._dataFromFile.index[0]
     
     def incrementTime(self):
         self._dt = self._dt + pd.Timedelta('1 hour')
@@ -29,4 +31,4 @@ class Controller:
         """
         Returns the current close price.
         """
-        return self._data.loc[self._dt]['close']
+        return self._dataFromFile.loc[self._dt]['close']
