@@ -1,5 +1,6 @@
 import pandas as pd
 import backtester
+import strategy
 from data import data_loader
 
 class Controller:
@@ -13,6 +14,7 @@ class Controller:
         self._fileLocation = fileLocation
         self._dataFromFile = None
         self._dataLoader = data_loader
+        self._strategy = None
 
     def loadData(self):
         self._dataFromFile = self._dataLoader.DataLoader(self._fileLocation).loadDataFromCSV()
@@ -32,3 +34,21 @@ class Controller:
         Returns the current close price.
         """
         return self._dataFromFile.loc[self._dt]['close']
+    
+    def returnCloseData(self):
+        """
+        Returns all the close data up to the current datetime.
+        """
+        return self._dataFromFile[self._dataFromFile.index <= self._dt]['close']
+
+    def attachStrategy(self, strat):
+        """
+        Attaches a strategy to the controller.
+        """
+        self._strategy = strat
+    
+    def getStrategySignal(self):
+        if self._strategy is None:
+            print('Cannot run strategy as none is attached')
+            return None
+        print(self._strategy.generateSignal(self.returnCloseData()))
