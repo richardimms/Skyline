@@ -33,7 +33,7 @@ class Controller:
         """
         Returns the current close price.
         """
-        return self._dataFromFile.loc[self._dt]['close']
+        return self._dataFromFile[:self._dt].iloc[-1]['close']
     
     def returnCloseData(self):
         """
