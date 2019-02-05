@@ -2,6 +2,7 @@ import pandas as pd
 import backtester
 import strategy
 from data import data_loader
+import json
 
 class Controller:
     """
@@ -15,6 +16,7 @@ class Controller:
         self._dataFromFile = None
         self._dataLoader = data_loader
         self._strategy = None
+        self._posma = None
 
     def loadData(self):
         self._dataFromFile = self._dataLoader.DataLoader(self._fileLocation).loadDataFromCSV()
@@ -47,8 +49,46 @@ class Controller:
         """
         self._strategy = strat
     
+    def attachPOSMA(self, posma):
+        """
+        Attaches a position manager to the controller
+        """
+        self._posma = posma
+    
     def getStrategySignal(self):
         if self._strategy is None:
             print('Cannot run strategy as none is attached')
             return None
-        print(self._strategy.generateSignal(self.returnCloseData()))
+        return self._strategy.generateSignal(self.returnCloseData())
+    
+    def run(self):
+        """
+        Triggers the running of a strategy and executes any orders.
+        """
+        order = self.getStrategySignal()
+        open_positions = self._posma.get_open_positions()
+
+        if order is None:
+            return None
+
+        if order == 'Long':
+            # Close any open short positions
+            for position in open_positions:
+                if position['units'] < 0:
+                    self._posma.close_position(position['id'], msg='counter signal')
+            # Only open new long position if there are no existing long positions
+            for position in open_positions:
+                if position['units'] > 0:
+                    return None
+            self._posma.open_position(100, msg='signal')
+
+        elif order == 'Short':
+            # Close any open long positions
+            for position in open_positions:
+                if position['units'] > 0:
+                    self._posma.close_position(position['id'], msg='counter signal')
+            # Only open new short position if there are no existing short positions
+            for position in open_positions:
+                if position['units'] < 0:
+                    return None
+            self._posma.open_position(-100, msg='signal')

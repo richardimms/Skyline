@@ -19,7 +19,7 @@ class MACStrategy:
     
         shortMA = data.rolling(window=self._shortPeriod).mean()
         longMA = data.rolling(window=self._longPeriod).mean()
-        print(round(shortMA.iloc[-1],5), round(longMA.iloc[-1],5))
+        # print(round(shortMA.iloc[-1],5), round(longMA.iloc[-1],5))
         if shortMA.iloc[-1] > longMA.iloc[-1]:
             return 'Long'
         else:
